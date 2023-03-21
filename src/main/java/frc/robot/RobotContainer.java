@@ -13,9 +13,15 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.ArmControlCommand;
+import frc.robot.commands.ArmControlCommandcopy;
+import frc.robot.commands.AutonDriveCommand;
 import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.LightsCommand;
 import frc.robot.commands.ToggleDriveSpeed;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.LightsSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -25,25 +31,42 @@ import frc.robot.subsystems.DrivetrainSubsystem;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
+  //private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
+  private final ArmSubsystem m_ArmSubsystem = new ArmSubsystem();
+  private final LightsSubsystem m_lights = new LightsSubsystem();
+  private AutonDriveCommand m_AutonDriveCommand ;
+  private LightsCommand m_lightsCommand;
+  private ArmControlCommand m_ArmControlCommand;
 
   private final Joystick m_controller = new Joystick(0);
+  private final Joystick m_clawController = new Joystick(2);
+  private final Joystick m_clawController2 = new Joystick(3);
+
+
+  private final XboxController m_xbox = new XboxController(1);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    m_ArmControlCommand = new ArmControlCommand(m_ArmSubsystem,() -> m_clawController.getX(),
+     /* */ () -> m_clawController.getY(),() -> m_clawController2.getX(),() -> m_clawController2.getY());
     // Set up the default command for the drivetrain.
     // The controls are for field-oriented driving:
     // Left stick Y axis -> forward and backwards movement
     // Left stick X axis -> left and right movement
-    // Right stick X axis -> rotation
-    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
-            m_drivetrainSubsystem,
-            () -> -modifyAxis(m_controller.getY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND *-0.5,
-            () -> -modifyAxis(m_controller.getX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND*-0.5,
-            () -> -modifyAxis(m_controller.getTwist()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND*-0.25
-    ));
+    // Right stick X axis -> rottion
+  //  m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
+    //        m_drivetrainSubsystem,
+      //      () -> -modifyAxis(m_controller.getY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND *0.5,
+        //    () -> -modifyAxis(m_controller.getX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND*0.5,
+          //  () -> -modifyAxis(m_controller.getTwist()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND*0.25
+    //));
+    m_lightsCommand = new LightsCommand(m_lights);
+    m_ArmSubsystem.setDefaultCommand(m_ArmControlCommand);
+   // m_lights.setDefaultCommand(m_lightsCommand);
+
+   //m_AutonDriveCommand = new AutonDriveCommand(m_drivetrainSubsystem);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -61,6 +84,12 @@ public class RobotContainer {
             // No requirements because we don't need to interrupt anything
             //.whenPressed(m_drivetrainSubsystem::zeroGyroscope);  //******* */
      // new JoystickButton(m_controller, 3).(m_drivetrainSubsystem.toggleSlowMode(););
+    // final JoystickButton lightsButton = new JoystickButton(m_xbox, 2);
+     final JoystickButton armSingleButton = new JoystickButton(m_xbox, 1);
+     armSingleButton.onTrue(new ArmControlCommandcopy(m_ArmSubsystem));
+
+
+    // lightsButton.onTrue(new LightsCommand(m_lights));
   }
 
   /**
@@ -70,7 +99,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return new InstantCommand();
+    return m_AutonDriveCommand;
   }
 
   private static double deadband(double value, double deadband) {

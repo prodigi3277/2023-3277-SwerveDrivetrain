@@ -193,6 +193,22 @@ m_Gyro.calibrate();      //***************** */
         isSlowMode = !isSlowMode;
   }
 
+  public void autonDrive(){
+        m_frontLeftModule.set(1, 0);
+        m_frontRightModule.set(1, 0);
+        m_backLeftModule.set(1, 0);
+        m_backRightModule.set(1, 0);
+ }
+
+ 
+
+ public void autonStop(){
+        m_frontLeftModule.set(0, 0);
+        m_frontRightModule.set(0, 0);
+        m_backLeftModule.set(0, 0);
+        m_backRightModule.set(0, 0);
+ }
+
   @Override
   public void periodic() {
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
@@ -211,5 +227,9 @@ m_Gyro.calibrate();      //***************** */
                 m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians()); //states[3].angle.getRadians()
              
         }
+
+        
      }
+
+     
 }
