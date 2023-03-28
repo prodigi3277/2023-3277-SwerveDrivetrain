@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.ArmControlCommand;
 import frc.robot.commands.ArmControlCommandcopy;
 import frc.robot.commands.AutonDriveAndPlaceCommand;
@@ -62,7 +63,7 @@ public class RobotContainer {
     configureButtonBindings();
 
     m_ArmControlCommand = new ArmControlCommand(m_ArmSubsystem,() -> -m_clawController2.getY(),
-     /* */ () -> m_xbox.getLeftY() /*meaningless rn */,() -> -m_clawController.getY(),() -> -m_clawController.getX());
+     /* */ () -> m_xbox.getLeftY() /*meaningless rn */,() -> -m_clawController.getY(), ConvertButtonToNumber(clawInButton, clawOutButton));
     // Set up the default command for the drivetrain.
     // The controls are for field-oriented driving:
     // Left stick Y axis -> forward and backwards movement
@@ -86,7 +87,22 @@ public class RobotContainer {
     // Configure the button bindings
   }
 
-  
+
+  public double ConvertButtonToNumber(Trigger m_positiveTrigger, Trigger m_negativeTrigger){
+     boolean isPressed = m_positiveTrigger.getAsBoolean();
+    boolean isNegPressed = m_negativeTrigger.getAsBoolean();
+      double finalValue;
+    if (isNegPressed && !isPressed) {
+      finalValue = -1;
+    } else if(isPressed && !isNegPressed) {
+      finalValue = 1;
+    }
+    else{
+      finalValue = 0;
+    }
+
+    return finalValue;
+  }
 
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
