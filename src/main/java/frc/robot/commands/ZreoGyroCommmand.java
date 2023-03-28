@@ -4,43 +4,33 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
-public class AutonDriveCommand extends CommandBase {
- private DrivetrainSubsystem m_drivetrain;
- private Timer m_time;
-  /** Creates a new ToggleDriveSpeed. */
-  public AutonDriveCommand(DrivetrainSubsystem drivetrain) {
-    m_drivetrain = drivetrain;
-    m_time = new Timer();
+public class ZreoGyroCommmand extends CommandBase {
+  DrivetrainSubsystem m_drive;
+  /** Creates a new ZreoGyroCommmand. */
+  public ZreoGyroCommmand(DrivetrainSubsystem drive) {
+    m_drive = drive;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(m_drivetrain);
+    addRequirements(m_drive);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_time.start();
+    m_drive.zeroGyroscope();
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(m_time.get() <= 6){
-      m_drivetrain.autonDrive();
-    }
-    if(m_time.get() > 6){
-      m_drivetrain.autonLock();
-    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    m_time.stop();
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override

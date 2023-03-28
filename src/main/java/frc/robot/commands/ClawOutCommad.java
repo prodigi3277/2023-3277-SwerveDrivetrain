@@ -4,42 +4,34 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.ArmSubsystem;
 
-public class AutonDriveCommand extends CommandBase {
- private DrivetrainSubsystem m_drivetrain;
- private Timer m_time;
-  /** Creates a new ToggleDriveSpeed. */
-  public AutonDriveCommand(DrivetrainSubsystem drivetrain) {
-    m_drivetrain = drivetrain;
-    m_time = new Timer();
+public class ClawOutCommad extends CommandBase {
+  ArmSubsystem m_arm;
+  /** Creates a new ClawInCommand. */
+  public ClawOutCommad(ArmSubsystem arm) {
+    m_arm = arm;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(m_drivetrain);
+    addRequirements(m_arm);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    m_time.start();
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(m_time.get() <= 6){
-      m_drivetrain.autonDrive();
-    }
-    if(m_time.get() > 6){
-      m_drivetrain.autonLock();
-    }
+    m_arm.claw(-1);
+    
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_time.stop();
+    m_arm.claw(0);
+
   }
 
   // Returns true when the command should end.

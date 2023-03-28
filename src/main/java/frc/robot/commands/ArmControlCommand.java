@@ -40,11 +40,27 @@ public class ArmControlCommand extends CommandBase {
     double actualPivotArmSpeed = m_pivotArmSpeed.getAsDouble();
     double actualRotateArmSpeed = m_rotateArmSpeed.getAsDouble();
     double actualClawArmSpeed = m_clawArmSpeed.getAsDouble();
+if (Math.abs(actualRotateArmSpeed) <= Math.abs(0.1)   ) {
+  m_arm.armRotate(0);
+}
+else if(Math.abs(actualRotateArmSpeed) > Math.abs(0.1)){
+  m_arm.armRotate(actualRotateArmSpeed);
+
+}
+
+if (Math.abs(actualClawArmSpeed) <= Math.abs(0.5)   ) {
+  m_arm.claw(0);
+}
+else if(Math.abs(actualClawArmSpeed) > Math.abs(0.5)){
+  m_arm.claw(actualClawArmSpeed);
+
+}
+
+
 
 
     m_arm.ExtendArm(actualExtendArmSpeed);
     m_arm.armPivot(actualPivotArmSpeed);
-    m_arm.armRotate(actualRotateArmSpeed);
     m_arm.claw(actualClawArmSpeed);
 
   }

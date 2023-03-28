@@ -15,10 +15,15 @@ import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ArmControlCommand;
 import frc.robot.commands.ArmControlCommandcopy;
+import frc.robot.commands.AutonDriveAndPlaceCommand;
 import frc.robot.commands.AutonDriveCommand;
+import frc.robot.commands.ClawInCommand;
+import frc.robot.commands.ClawOutCommad;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.commands.LightsCommand;
+import frc.robot.commands.LockButtonCommand;
 import frc.robot.commands.ToggleDriveSpeed;
+import frc.robot.commands.ZreoGyroCommmand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.LightsSubsystem;
@@ -31,12 +36,14 @@ import frc.robot.subsystems.LightsSubsystem;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  //private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
+  private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   private final ArmSubsystem m_ArmSubsystem = new ArmSubsystem();
   private final LightsSubsystem m_lights = new LightsSubsystem();
   private AutonDriveCommand m_AutonDriveCommand ;
+  private AutonDriveAndPlaceCommand m_DriveAndPlaceCommand;
   private LightsCommand m_lightsCommand;
   private ArmControlCommand m_ArmControlCommand;
+
 
   private final Joystick m_controller = new Joystick(0);
   private final Joystick m_clawController = new Joystick(2);
@@ -49,24 +56,25 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    m_ArmControlCommand = new ArmControlCommand(m_ArmSubsystem,() -> m_clawController.getX(),
-     /* */ () -> m_clawController.getY(),() -> m_clawController2.getX(),() -> m_clawController2.getY());
+    m_ArmControlCommand = new ArmControlCommand(m_ArmSubsystem,() -> -m_clawController2.getY(),
+     /* */ () -> m_xbox.getLeftY() /*meaningless rn */,() -> -m_clawController.getY(),() -> -m_clawController.getX());
     // Set up the default command for the drivetrain.
     // The controls are for field-oriented driving:
     // Left stick Y axis -> forward and backwards movement
     // Left stick X axis -> left and right movement
     // Right stick X axis -> rottion
-  //  m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
-    //        m_drivetrainSubsystem,
-      //      () -> -modifyAxis(m_controller.getY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND *0.5,
-        //    () -> -modifyAxis(m_controller.getX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND*0.5,
-          //  () -> -modifyAxis(m_controller.getTwist()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND*0.25
-    //));
+    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
+            m_drivetrainSubsystem,
+            () -> -modifyAxis(m_controller.getY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND ,
+           () -> -modifyAxis(m_controller.getX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+            () -> -modifyAxis(m_controller.getTwist()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND*0.25
+    ));
     m_lightsCommand = new LightsCommand(m_lights);
     m_ArmSubsystem.setDefaultCommand(m_ArmControlCommand);
    // m_lights.setDefaultCommand(m_lightsCommand);
 
-   //m_AutonDriveCommand = new AutonDriveCommand(m_drivetrainSubsystem);
+   m_AutonDriveCommand = new AutonDriveCommand(m_drivetrainSubsystem);
+   m_DriveAndPlaceCommand = new AutonDriveAndPlaceCommand(m_drivetrainSubsystem, m_ArmSubsystem);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -80,14 +88,22 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Back button zeros the gyroscope
-   // new Button(m_controller::getBackButton) ; //**************** */
+    //new Button(m_controller::getBackButton) //**************** */
+    final JoystickButton zeroGyro = new JoystickButton(m_controller, 4) ;
             // No requirements because we don't need to interrupt anything
-            //.whenPressed(m_drivetrainSubsystem::zeroGyroscope);  //******* */
+            zeroGyro.onTrue(new ZreoGyroCommmand(m_drivetrainSubsystem));  //******* */
      // new JoystickButton(m_controller, 3).(m_drivetrainSubsystem.toggleSlowMode(););
     // final JoystickButton lightsButton = new JoystickButton(m_xbox, 2);
-     final JoystickButton armSingleButton = new JoystickButton(m_xbox, 1);
-     armSingleButton.onTrue(new ArmControlCommandcopy(m_ArmSubsystem));
+    // final JoystickButton armSingleButton = new JoystickButton(m_xbox, 1);
+     final JoystickButton clawInButton = new JoystickButton(m_clawController2, 2);
+     final JoystickButton clawOutButton = new JoystickButton(m_clawController, 2);
 
+    //final JoystickButton driveLockButton = new JoystickButton(m_controller, 4);
+   //  armSingleButton.onTrue(new ArmControlCommandcopy(m_ArmSubsystem));
+     clawInButton.whileHeld(new ClawInCommand(m_ArmSubsystem));
+     clawOutButton.whileHeld(new ClawOutCommad(m_ArmSubsystem));
+
+  //  driveLockButton.onTrue(new LockButtonCommand(m_drivetrainSubsystem));
 
     // lightsButton.onTrue(new LightsCommand(m_lights));
   }
@@ -99,7 +115,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return m_AutonDriveCommand;
+    return m_DriveAndPlaceCommand;
   }
 
   private static double deadband(double value, double deadband) {

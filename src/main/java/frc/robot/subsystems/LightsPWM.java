@@ -15,7 +15,6 @@ public class LightsPWM extends SubsystemBase {
     m_ledStrip = new AddressableLED(9);
       
     } catch (Exception e) {
-      // TODO: handle exception
     }
 
     m_ledStrip.setLength(45);

@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ArmSubsystem extends SubsystemBase {
@@ -15,7 +16,6 @@ public class ArmSubsystem extends SubsystemBase {
   WPI_TalonFX pivotArm;
   WPI_TalonFX rotateArm;
   WPI_TalonSRX claw;
-
   /** Creates a new ArmSubsystem. */
   public ArmSubsystem() {
     try {
@@ -40,12 +40,18 @@ public class ArmSubsystem extends SubsystemBase {
       // TODO: handle exception
       System.out.println("claw arm motor not here");
     }
+    
  pivotArm.setNeutralMode(NeutralMode.Brake);
+ rotateArm.setNeutralMode(NeutralMode.Brake);
+ extendArm.setNeutralMode(NeutralMode.Brake);
+
+
 
   }
 
   public void ExtendArm(double extendArmSpeed){
-    extendArm.set(extendArmSpeed);
+    double newExtendArmSpeed = (extendArmSpeed- (0.3*extendArmSpeed));
+    extendArm.set(newExtendArmSpeed);
   }
 
   public void armPivot(double pivotArmSpeed){
@@ -54,7 +60,10 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public void armRotate(double rotateArmSpeed){
-    rotateArm.set(rotateArmSpeed);
+    
+    double newRotateArmSpeeed =(rotateArmSpeed - (rotateArmSpeed*.2));
+
+    rotateArm.set(newRotateArmSpeeed);
   }
 
   public void claw(double clawArmSpeed){

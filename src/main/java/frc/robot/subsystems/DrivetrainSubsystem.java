@@ -18,8 +18,9 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.AnalogGyro;
-
+import edu.wpi.first.wpilibj.ADIS16448_IMU.IMUAxis;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 import static frc.robot.Constants.*;
 
@@ -30,7 +31,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * This can be reduced to cap the robot's maximum speed. Typically, this is useful during initial testing of the robot.
    */
   public static final double MAX_VOLTAGE = 12.0;
-  // FIXME Measure the drivetrain's maximum velocity or calculate the theoretical.
   //  The formula for calculating the theoretical maximum velocity is:
   //   <Motor free speed RPM> / 60 * <Drive reduction> * <Wheel diameter meters> * pi
   //  By default this value is setup for a Mk3 standard module using Falcon500s to drive.
@@ -67,9 +67,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   // By default we use a Pigeon for our gyroscope. But if you use another gyroscope, like a NavX, you can change this.
   // The important thing about how you configure your gyroscope is that rotating the robot counter-clockwise should
   // cause the angle reading to increase until it wraps back over to zero.
-  // FIXME Remove if you are using a Pigeon
   private final ADIS16470_IMU  m_Gyro = new ADIS16470_IMU();
-  // FIXME Uncomment if you are using a NavX
 //  private final AHRS m_navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
 
   // These are our modules. We initialize them in the constructor.
@@ -79,8 +77,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final SwerveModule m_backRightModule;
 
   private boolean isSlowMode;
+  public boolean isLocked;
 
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
+  private ChassisSpeeds m_autoChassisSpeeds;
 
   public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
@@ -104,7 +104,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     // By default we will use Falcon 500s in standard configuration. But if you use a different configuration or motors
     // you MUST change it. If you do not, your code will crash on startup.
-    // FIXME Setup motor configuration
+    
     m_frontLeftModule = Mk4iSwerveModuleHelper.createFalcon500(
             // This parameter is optional, but will allow you to see the current state of the module on the dashboard.
             tab.getLayout("Front Left Module", BuiltInLayouts.kList)
@@ -156,6 +156,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             BACK_RIGHT_MODULE_STEER_OFFSET
     );
     isSlowMode = true;
+    isLocked = false;
   }
 
 
@@ -163,19 +164,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * Sets the gyroscope angle to zero. This can be used to set the direction the robot is currently facing to the
    * 'forwards' direction.
    */
-  public void zeroGyroscope() { // *******************
-    // FIXME Remove if you are using a Pigeon
+  public void zeroGyroscope() { // ********
    // m_pigeon.setFusedHeading(0.0);
 m_Gyro.calibrate();      //***************** */
-    // FIXME Uncomment if you are using a NavX
 //    m_navx.zeroYaw();
   }
 
   public Rotation2d getGyroscopeRotation() {
-    // FIXME Remove if you are using a Pigeon
-    return Rotation2d.fromDegrees(m_Gyro.getAngle());
+    return Rotation2d.fromDegrees(m_Gyro.getAngle() + 180);
 
-    // FIXME Uncomment if you are using a NavX
 //    if (m_navx.isMagnetometerCalibrated()) {
 //      // We will only get valid fused headings if the magnetometer is calibrated
 //      return Rotation2d.fromDegrees(m_navx.getFusedHeading());
@@ -194,31 +191,61 @@ m_Gyro.calibrate();      //***************** */
   }
 
   public void autonDrive(){
-        m_frontLeftModule.set(1, 0);
-        m_frontRightModule.set(1, 0);
-        m_backLeftModule.set(1, 0);
-        m_backRightModule.set(1, 0);
+        m_frontLeftModule.set(1.75, 0);
+        m_frontRightModule.set(1.75, 0);
+        m_backLeftModule.set(1.75, 0);
+        m_backRightModule.set(1.75, 0);
  }
 
  
 
  public void autonStop(){
+        m_frontLeftModule.set(0, 180);
+        m_frontRightModule.set(0, 90);
+        m_backLeftModule.set(0, 90);
+        m_backRightModule.set(0, 0);
+ }
+
+ public void autonLock(){
         m_frontLeftModule.set(0, 0);
         m_frontRightModule.set(0, 0);
         m_backLeftModule.set(0, 0);
         m_backRightModule.set(0, 0);
  }
 
+ public void autonZero(){
+        if(Math.toDegrees(m_Gyro.getAngle())>15){
+                m_frontLeftModule.set(1.5, 0);
+                m_frontRightModule.set(1.5, 0);
+                m_backLeftModule.set(1.5, 0);
+                m_backRightModule.set(1.5, 0);
+        }
+
+        if(Math.toDegrees(m_Gyro.getAngle())<-15){
+                m_frontLeftModule.set(1.5, 180);
+                m_frontRightModule.set(1.5, 180);
+                m_backLeftModule.set(1.5, 180);
+                m_backRightModule.set(1.5, 180);
+        }
+ }
+
   @Override
   public void periodic() {
+        if(isLocked){
+                m_frontLeftModule.set(0, 180);
+                m_frontRightModule.set(0, 90);
+                m_backLeftModule.set(0, 90);
+                m_backRightModule.set(0, 0);
+                return;
+        }
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
         if(isSlowMode){
                 
-    m_frontLeftModule.set((states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE) * -0.5, states[0].angle.getRadians());// 0
-    m_frontRightModule.set((states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE)* -0.5, states[1].angle.getRadians()); //1
-    m_backLeftModule.set((states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE)* -0.5, states[2].angle.getRadians()); //2
-    m_backRightModule.set((states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE)* -0.5, states[3].angle.getRadians());
+    m_frontLeftModule.set((states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE) * -1, states[0].angle.getRadians());// 0
+    m_frontRightModule.set((states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE)* -1, states[1].angle.getRadians()); //1
+    m_backLeftModule.set((states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE)* -1, states[2].angle.getRadians()); //2
+    m_backRightModule.set((states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE)* -1, states[3].angle.getRadians());
         }
         else if(!isSlowMode){
                 m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[0].angle.getRadians());// 0
