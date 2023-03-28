@@ -56,9 +56,6 @@ else if(Math.abs(actualClawArmSpeed) > Math.abs(0.5)){
 
 }
 
-
-
-
     m_arm.ExtendArm(actualExtendArmSpeed);
     m_arm.armPivot(actualPivotArmSpeed);
     m_arm.claw(actualClawArmSpeed);

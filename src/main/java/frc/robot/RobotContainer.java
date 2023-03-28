@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -27,6 +28,8 @@ import frc.robot.commands.ZreoGyroCommmand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.LightsSubsystem;
+import frc.robot.test;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -56,19 +59,23 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    configureButtonBindings();
+
     m_ArmControlCommand = new ArmControlCommand(m_ArmSubsystem,() -> -m_clawController2.getY(),
      /* */ () -> m_xbox.getLeftY() /*meaningless rn */,() -> -m_clawController.getY(),() -> -m_clawController.getX());
     // Set up the default command for the drivetrain.
     // The controls are for field-oriented driving:
     // Left stick Y axis -> forward and backwards movement
     // Left stick X axis -> left and right movement
-    // Right stick X axis -> rottion
-    m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
+    // Right stick X axis -> rotation
+
+   /*  m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             m_drivetrainSubsystem,
             () -> -modifyAxis(m_controller.getY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND ,
            () -> -modifyAxis(m_controller.getX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
             () -> -modifyAxis(m_controller.getTwist()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND*0.25
-    ));
+    )); */
+
     m_lightsCommand = new LightsCommand(m_lights);
     m_ArmSubsystem.setDefaultCommand(m_ArmControlCommand);
    // m_lights.setDefaultCommand(m_lightsCommand);
@@ -77,8 +84,9 @@ public class RobotContainer {
    m_DriveAndPlaceCommand = new AutonDriveAndPlaceCommand(m_drivetrainSubsystem, m_ArmSubsystem);
 
     // Configure the button bindings
-    configureButtonBindings();
   }
+
+  
 
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
@@ -96,12 +104,14 @@ public class RobotContainer {
     // final JoystickButton lightsButton = new JoystickButton(m_xbox, 2);
     // final JoystickButton armSingleButton = new JoystickButton(m_xbox, 1);
      final JoystickButton clawInButton = new JoystickButton(m_clawController2, 2);
-     final JoystickButton clawOutButton = new JoystickButton(m_clawController, 2);
+     final JoystickButton clawOutButton = new JoystickButton(m_clawController2, 3);
 
     //final JoystickButton driveLockButton = new JoystickButton(m_controller, 4);
    //  armSingleButton.onTrue(new ArmControlCommandcopy(m_ArmSubsystem));
-     clawInButton.whileHeld(new ClawInCommand(m_ArmSubsystem));
-     clawOutButton.whileHeld(new ClawOutCommad(m_ArmSubsystem));
+   // final test m_testVariable = new test(null, clawOutButton);
+   //  m_testVariable.whileItIsTrue(new ClawInCommand(m_ArmSubsystem));
+   clawInButton.whileTrue(new ClawInCommand(m_ArmSubsystem));
+     clawOutButton.whileTrue(new ClawOutCommad(m_ArmSubsystem));
 
   //  driveLockButton.onTrue(new LockButtonCommand(m_drivetrainSubsystem));
 

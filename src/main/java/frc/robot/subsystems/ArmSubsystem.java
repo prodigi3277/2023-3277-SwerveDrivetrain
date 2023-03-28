@@ -16,6 +16,8 @@ public class ArmSubsystem extends SubsystemBase {
   WPI_TalonFX pivotArm;
   WPI_TalonFX rotateArm;
   WPI_TalonSRX claw;
+  WPI_TalonSRX claw2;
+
   /** Creates a new ArmSubsystem. */
   public ArmSubsystem() {
     try {
@@ -41,6 +43,12 @@ public class ArmSubsystem extends SubsystemBase {
       System.out.println("claw arm motor not here");
     }
     
+    try {
+      claw2 = new WPI_TalonSRX(17);
+    } catch (Exception e) {
+     System.out.println("second claw motor not here");
+    
+    }
  pivotArm.setNeutralMode(NeutralMode.Brake);
  rotateArm.setNeutralMode(NeutralMode.Brake);
  extendArm.setNeutralMode(NeutralMode.Brake);
@@ -69,6 +77,24 @@ public class ArmSubsystem extends SubsystemBase {
   public void claw(double clawArmSpeed){
 claw.set(clawArmSpeed);
   }
+
+  public void clawButtonIn(){
+claw.set(1);
+claw2.set(1);
+  }
+
+  public void clawButtonOut(){
+    claw.set(-1);
+    claw2.set(-1);
+    
+
+      }
+  
+      public void clawButtonStop(){
+        claw.set(0);
+        claw2.set(0);
+
+      }
 
   @Override
   public void periodic() {
