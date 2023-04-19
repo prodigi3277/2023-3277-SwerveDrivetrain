@@ -1,9 +1,11 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.event.EventLoop;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.util.ErrorMessages.requireNonNullParam;
 
@@ -38,6 +40,46 @@ public class test implements BooleanSupplier {
             });
         return this;
       }
+
+      public static DoubleSupplier ConvertButtonToNumber(String m_positiveTrigger, String m_negativeTrigger){
+        boolean isPressed;
+       boolean isNegPressed;
+       System.out.println("hi");
+
+        switch (m_positiveTrigger) {
+            case "true":
+             isPressed = true;
+            
+                break;
+        
+            default:
+             isPressed = false;
+
+                break;
+        }
+        switch (m_negativeTrigger) {
+            case "true":
+             isNegPressed = true;
+            
+                break;
+        
+            default:
+             isNegPressed = false;
+
+                break;
+        }
+         double finalValue;
+       if (isNegPressed && !isPressed) {
+         finalValue = -1;
+       } else if(isPressed && !isNegPressed) {
+         finalValue = 1;
+       }
+       else{
+         finalValue = 0;
+       }
+   
+       return () -> finalValue;
+     }
 
     @Override
     public boolean getAsBoolean() {

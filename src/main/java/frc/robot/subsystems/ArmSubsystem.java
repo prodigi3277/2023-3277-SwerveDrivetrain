@@ -76,6 +76,8 @@ public class ArmSubsystem extends SubsystemBase {
 
   public void claw(double clawArmSpeed){
 claw.set(clawArmSpeed);
+claw2.set(clawArmSpeed);
+
   }
 
   public void clawButtonIn(){

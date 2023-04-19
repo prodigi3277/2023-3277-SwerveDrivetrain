@@ -60,22 +60,29 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    
+   
+
+
+    m_ArmControlCommand = new ArmControlCommand(m_ArmSubsystem, test.ConvertButtonToNumber("lawInButton.toString()",
+   "clawOutButton.toString()"),() -> -m_clawController2.getY(),
+     /* */ () -> m_xbox.getLeftY() /*meaningless rn */,() -> -m_clawController.getY()
+     );
+
     configureButtonBindings();
 
-    m_ArmControlCommand = new ArmControlCommand(m_ArmSubsystem,() -> -m_clawController2.getY(),
-     /* */ () -> m_xbox.getLeftY() /*meaningless rn */,() -> -m_clawController.getY(), ConvertButtonToNumber(clawInButton, clawOutButton));
     // Set up the default command for the drivetrain.
     // The controls are for field-oriented driving:
     // Left stick Y axis -> forward and backwards movement
     // Left stick X axis -> left and right movement
     // Right stick X axis -> rotation
 
-   /*  m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
+     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             m_drivetrainSubsystem,
             () -> -modifyAxis(m_controller.getY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND ,
            () -> -modifyAxis(m_controller.getX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
             () -> -modifyAxis(m_controller.getTwist()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND*0.25
-    )); */
+    ));
 
     m_lightsCommand = new LightsCommand(m_lights);
     m_ArmSubsystem.setDefaultCommand(m_ArmControlCommand);
@@ -88,21 +95,7 @@ public class RobotContainer {
   }
 
 
-  public double ConvertButtonToNumber(Trigger m_positiveTrigger, Trigger m_negativeTrigger){
-     boolean isPressed = m_positiveTrigger.getAsBoolean();
-    boolean isNegPressed = m_negativeTrigger.getAsBoolean();
-      double finalValue;
-    if (isNegPressed && !isPressed) {
-      finalValue = -1;
-    } else if(isPressed && !isNegPressed) {
-      finalValue = 1;
-    }
-    else{
-      finalValue = 0;
-    }
-
-    return finalValue;
-  }
+ 
 
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
@@ -111,6 +104,8 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    Command clawInCommand = new ClawInCommand(m_ArmSubsystem);
+    Command clawOutCommand = new ClawOutCommad(m_ArmSubsystem);
     // Back button zeros the gyroscope
     //new Button(m_controller::getBackButton) //**************** */
     final JoystickButton zeroGyro = new JoystickButton(m_controller, 4) ;
@@ -119,20 +114,25 @@ public class RobotContainer {
      // new JoystickButton(m_controller, 3).(m_drivetrainSubsystem.toggleSlowMode(););
     // final JoystickButton lightsButton = new JoystickButton(m_xbox, 2);
     // final JoystickButton armSingleButton = new JoystickButton(m_xbox, 1);
-     final JoystickButton clawInButton = new JoystickButton(m_clawController2, 2);
-     final JoystickButton clawOutButton = new JoystickButton(m_clawController2, 3);
+    
+     final JoystickButton clawInButton = new JoystickButton(m_xbox, 1);
+     final JoystickButton clawOutButton = new JoystickButton(m_xbox, 2); 
 
     //final JoystickButton driveLockButton = new JoystickButton(m_controller, 4);
    //  armSingleButton.onTrue(new ArmControlCommandcopy(m_ArmSubsystem));
    // final test m_testVariable = new test(null, clawOutButton);
    //  m_testVariable.whileItIsTrue(new ClawInCommand(m_ArmSubsystem));
-   clawInButton.whileTrue(new ClawInCommand(m_ArmSubsystem));
-     clawOutButton.whileTrue(new ClawOutCommad(m_ArmSubsystem));
-
+    clawInButton.whileTrue( clawInCommand);
+     clawOutButton.whileTrue( clawOutCommand); 
   //  driveLockButton.onTrue(new LockButtonCommand(m_drivetrainSubsystem));
 
     // lightsButton.onTrue(new LightsCommand(m_lights));
   }
+
+  
+
+
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

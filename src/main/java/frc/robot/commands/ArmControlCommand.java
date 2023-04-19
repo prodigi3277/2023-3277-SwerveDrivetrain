@@ -17,8 +17,10 @@ public class ArmControlCommand extends CommandBase {
   DoubleSupplier m_clawArmSpeed;
 
   /** Creates a new ArmControlCommand. */
-  public ArmControlCommand(ArmSubsystem arm, DoubleSupplier extendArmSpeed,DoubleSupplier pivotArmSpeed,
-  DoubleSupplier rotateArmSpeed,DoubleSupplier clawArmSpeed) {
+  public ArmControlCommand(ArmSubsystem arm ,DoubleSupplier clawArmSpeed,DoubleSupplier extendArmSpeed
+  ,DoubleSupplier pivotArmSpeed,
+  
+  DoubleSupplier rotateArmSpeed) {
     m_arm = arm;
     m_extendArmSpeed = extendArmSpeed;
     m_pivotArmSpeed = pivotArmSpeed;
